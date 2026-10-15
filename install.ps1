@@ -4,17 +4,34 @@
 $ErrorActionPreference = 'Stop'
 $repo = 'HenriqueRicieri/session-hud'
 
-# 1. Acha o claude: o do PATH, ou o que vem dentro do app desktop
-$claude = (Get-Command claude -ErrorAction SilentlyContinue).Source
-if (-not $claude) {
-    $claude = Get-ChildItem "$env:APPDATA\Claude\claude-code\*\*\claude.exe" -ErrorAction SilentlyContinue |
-        Sort-Object LastWriteTime -Descending | Select-Object -First 1 -ExpandProperty FullName
+$minVersion = [version]'2.1.295'  # versao em que o mod foi testado; versoes antigas nao carregam hooks de funcao
+
+function Get-ClaudeVersion($exe) {
+    $out = & $exe --version 2>$null | Select-Object -First 1
+    if ($out -match '(\d+\.\d+\.\d+)') { [version]$Matches[1] } else { [version]'0.0.0' }
 }
-if (-not $claude) {
+
+# 1. Acha o claude: o do PATH e o que vem dentro do app desktop; usa o mais novo
+$candidates = @()
+$onPath = (Get-Command claude -ErrorAction SilentlyContinue).Source
+if ($onPath) { $candidates += $onPath }
+$candidates += Get-ChildItem "$env:APPDATA\Claude\claude-code\*\*\claude.exe" -ErrorAction SilentlyContinue |
+    Select-Object -ExpandProperty FullName
+if (-not $candidates) {
     Write-Host 'Claude Code nao encontrado. Instale o Claude Code (ou o app desktop) e rode de novo.' -ForegroundColor Red
     return
 }
-Write-Host "Usando $claude"
+$found = $candidates | ForEach-Object { [pscustomobject]@{ Path = $_; Version = Get-ClaudeVersion $_ } } |
+    Sort-Object Version -Descending
+$claude = $found[0].Path
+Write-Host "Usando $claude ($($found[0].Version))"
+if ($found[0].Version -lt $minVersion) {
+    Write-Host "Aviso: Claude Code $($found[0].Version) e antigo; o mod precisa de $minVersion ou mais novo. Rode 'claude update' ou atualize o app." -ForegroundColor Yellow
+}
+$pathVersion = ($found | Where-Object Path -eq $onPath | Select-Object -First 1).Version
+if ($onPath -and $pathVersion -lt $minVersion) {
+    Write-Host "Aviso: o 'claude' do terminal ($pathVersion) e antigo e nao carrega o mod; no app desktop funciona. Para o terminal: claude update" -ForegroundColor Yellow
+}
 
 # 2. Marketplace + plugin
 & $claude plugin marketplace add $repo
