@@ -15,16 +15,22 @@ Funciona no terminal e no app desktop.
 
 ## Instalar
 
-Num terminal com o `claude` interativo (o comando não existe no app desktop):
+**Windows — cole no PowerShell:**
+
+```powershell
+irm https://raw.githubusercontent.com/HenriqueRicieri/session-hud/main/install.ps1 | iex
+```
+
+Acha o Claude Code (inclusive o que vem no app desktop), instala no escopo **user** (permanente) e liga `CLAUDE_CODE_ENABLE_FUNCTION_HOOKS=1` no `~/.claude/settings.json` (com backup). Depois é só abrir uma sessão nova.
+
+**Qualquer sistema — dois comandos no terminal:**
 
 ```
-/plugin install session-hud --marketplace HenriqueRicieri/session-hud
+claude plugin marketplace add HenriqueRicieri/session-hud
+claude plugin install session-hud@session-hud --scope user
 ```
 
-1. `Add marketplace?` → `y`
-2. Escopo → **user** (Enter). Assim fica permanente: carrega em toda sessão nova, inclusive no app desktop.
-
-Mods de função ainda são early access. Se a faixa não aparecer, adicione ao `env` do `~/.claude/settings.json` e abra uma sessão nova:
+Mods de função ainda são early access: se a faixa não aparecer, adicione ao `env` do `~/.claude/settings.json` e abra uma sessão nova:
 
 ```json
 "env": { "CLAUDE_CODE_ENABLE_FUNCTION_HOOKS": "1" }
@@ -33,7 +39,7 @@ Mods de função ainda são early access. Se a faixa não aparecer, adicione ao 
 ## Atualizar
 
 ```
-claude plugin update session-hud
+claude plugin update session-hud@session-hud
 ```
 
 Depois `/reload-plugins` numa sessão aberta, ou abra uma nova.
