@@ -1,0 +1,6 @@
+{
+  "name": "session-hud",
+  "version": "0.2.0",
+  "description": "Contexto, limites do plano e custo da sessão numa faixa acima do prompt, com painel de detalhes (/hud)",
+  "types": "./types/index.d.ts"
+}
